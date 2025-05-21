@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Eyebook Library</title>
+  <link rel="icon" href="logo.png" />
+  <style>
+    :root {
+      --primary-color: #007bff;
+      --light-bg: #f9f9f9;
+      --border-color: #dce3ea;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--light-bg);
+      color: #333;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 15px;
+      background-color: white;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    #logo {
+      width: 35px;
+      height: 35px;
+      border-radius: 50%;
+      overflow: hidden;
+      border: 2px solid var(--primary-color);
+    }
+
+    #logo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    #title {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--primary-color);
+      margin-left: 8px;
+    }
+
+    #years {
+      flex-grow: 1;
+      text-align: center;
+      color: #888;
+      font-size: 14px;
+    }
+
+    #search-bar {
+      padding: 6px;
+      border-radius: 20px;
+      border: 1px solid var(--border-color);
+      width: 160px;
+    }
+
+    main {
+      display: flex;
+      min-height: calc(100vh - 80px);
+    }
+
+    aside {
+      width: 200px;
+      background-color: white;
+      padding: 15px;
+      border-right: 1px solid var(--border-color);
+    }
+
+    .filter-section {
+      margin-bottom: 20px;
+    }
+
+    .filter-section h3 {
+      font-size: 14px;
+      color: var(--primary-color);
+      margin-bottom: 10px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .filter-section button {
+      background-color: #fff;
+      border: 1px solid var(--border-color);
+      color: #333;
+      padding: 6px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+      transition: all 0.2s ease;
+    }
+
+    .filter-section button.active {
+      background-color: var(--primary-color);
+      color: white;
+    }
+
+    .filter-section button:hover:not(:disabled) {
+      background-color: var(--primary-color);
+      color: white;
+    }
+
+    .filter-section button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .content {
+      flex-grow: 1;
+      padding: 20px;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      gap: 16px;
+    }
+
+    .book {
+      display: block;
+      border-radius: 6px;
+      overflow: hidden;
+      border: 1px solid var(--border-color);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .book:hover {
+      transform: scale(1.03);
+      box-shadow: 0 4px 10px rgba(0, 123, 255, 0.2);
+    }
+
+    .book img {
+      width: 100%;
+      height: 160px;
+      object-fit: cover;
+    }
+
+    .book p {
+      text-align: center;
+      margin: 5px 0;
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    footer {
+      text-align: center;
+      padding: 10px;
+      background-color: white;
+      border-top: 1px solid var(--border-color);
+      color: #777;
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div style="display: flex; align-items: center;">
+      <div id="logo">
+        <img src="logo.png" alt="Logo" />
+      </div>
+      <div id="title">Eyebook Library</div>
+    </div>
+    <div id="years">2023 • 2024 • 2025</div>
+    <input type="text" id="search-bar" placeholder="Search books..." />
+  </header>
+
+  <main>
+    <aside>
+      <div class="filter-section">
+        <h3>Medium</h3>
+        <div class="grid" id="medium-buttons"></div>
+      </div>
+      <div class="filter-section">
+        <h3>Stream</h3>
+        <div class="grid" id="stream-buttons"></div>
+      </div>
+      <div class="filter-section">
+        <h3>Class</h3>
+        <div class="grid" id="class-buttons"></div>
+      </div>
+    </aside>
+
+    <section class="content" id="book-section">
+      <p>Please select a medium first.</p>
+    </section>
+  </main>
+
+  <footer>&copy; 2025 Eyebook Library. All rights reserved.</footer>
+
+  <script>
+    const searchInput = document.getElementById("search-bar");
+    const bookSection = document.getElementById("book-section");
+
+    const mediumButtons = document.getElementById("medium-buttons");
+    const streamButtons = document.getElementById("stream-buttons");
+    const classButtons = document.getElementById("class-buttons");
+
+    const mediums = [
+      "English",
+      "Hindi",
+      "Bengali",
+      "Marathi",
+      "Gujarati",
+      "Telugu",
+      "Tamil",
+      "Kannada",
+      "Punjabi",
+      "Urdu",
+      "Malayalam",
+      "Odia",
+    ];
+    const streams = ["Science", "Commerce", "Arts"];
+    // Subjects to recognize in search
+    const subjects = [
+      "math",
+      "mathematics",
+      "physics",
+      "chemistry",
+      "english",
+      "history",
+      "geography",
+      "biology",
+      "accountancy",
+      "economics",
+      "business",
+      "commerce",
+      "computer",
+      "cs",
+      "political",
+      "arts",
+      "sanskrit",
+    ];
+
+    let selectedMedium = "";
+    let selectedStream = "";
+    let selectedClass = 0;
+
+    const allBooks = [];
+
+    // Reset active state of buttons in container
+    function resetButtons(container) {
+      container.querySelectorAll("button").forEach((btn) => btn.classList.remove("active"));
+    }
+
+    // Populate buttons
+    function createButtons() {
+      // Medium buttons
+      mediums.forEach((medium) => {
+        const btn = document.createElement("button");
+        btn.textContent = medium;
+        btn.onclick = () => {
+          if (selectedMedium === medium) {
+            selectedMedium = "";
+            resetButtons(mediumButtons);
+            selectedStream = "";
+            resetButtons(streamButtons);
+            selectedClass = 0;
+            disableStreams(true);
+            disableClasses(true);
+            bookSection.innerHTML = "<p>Please select a medium first.</p>";
+            return;
+          }
+          selectedMedium = medium;
+          resetButtons(mediumButtons);
+          btn.classList.add("active");
+
+          disableStreams(false);
+          disableClasses(false);
+
+          // Disable 11 & 12 class if stream not selected
+          if (!selectedStream) {
+            classButtons.querySelectorAll("button").forEach((b) => {
+              const clsNum = parseInt(b.dataset.class);
+              b.disabled = clsNum >= 11;
+            });
+          }
+          selectedStream = "";
+          resetButtons(streamButtons);
+          selectedClass = 0;
+          bookSection.innerHTML = "<p>Please select a class.</p>";
+        };
+        mediumButtons.appendChild(btn);
+      });
+
+      // Stream buttons
+      streams.forEach((stream) => {
+        const btn = document.createElement("button");
+        btn.textContent = stream;
+        btn.disabled = true;
+        btn.onclick = () => {
+          if (selectedStream === stream) {
+            selectedStream = "";
+            resetButtons(streamButtons);
+            disableClasses(false);
+            // Disable 11 & 12 classes if stream not selected
+            classButtons.querySelectorAll("button").forEach((b) => {
+              const clsNum = parseInt(b.dataset.class);
+              b.disabled = clsNum >= 11;
+            });
+            selectedClass = 0;
+            bookSection.innerHTML = "<p>Please select a class.</p>";
+            return;
+          }
+          selectedStream = stream;
+          resetButtons(streamButtons);
+          btn.classList.add("active");
+
+          // Disable classes 1-10, enable 11 and 12
+          classButtons.querySelectorAll("button").forEach((b) => {
+            const clsNum = parseInt(b.dataset.class);
+            b.disabled = clsNum < 11;
+          });
+          selectedClass = 0;
+          bookSection.innerHTML = "<p>Please select a class.</p>";
+        };
+        streamButtons.appendChild(btn);
+      });
+
+      // Class buttons 1 to 12
+      for (let i = 1; i <= 12; i++) {
+        const btn = document.createElement("button");
+        btn.textContent = `Class ${i}`;
+        btn.dataset.class = i;
+        btn.disabled = true;
+        btn.onclick = () => {
+          if ((i === 11 || i === 12) && !selectedStream) return;
+          selectedClass = i;
+          resetButtons(classButtons);
+          btn.classList.add("active");
+          renderBooks();
+        };
+        classButtons.appendChild(btn);
+      }
+    }
+
+    function disableStreams(state) {
+      streamButtons.querySelectorAll("button").forEach((b) => {
+        b.disabled = state;
+      });
+    }
+
+    function disableClasses(state) {
+      classButtons.querySelectorAll("button").forEach((b) => {
+        b.disabled = state;
+      });
+    }
+
+    // Generate books array for currently selected medium, stream and class
+    function generateBooks() {
+      allBooks.length = 0; // clear
+
+      for (let cls = 1; cls <= 12; cls++) {
+        for (let i = 1; i <= 6; i++) {
+          // We fake a subject list for demonstration:
+          // cycle subjects for books
+          const subject = subjects[i % subjects.length] || "general";
+
+          // Compose book name based on class, subject, stream (if applicable)
+          let name = "";
+          let src = "";
+
+          if (cls < 11) {
+            name = `class${cls}-${subject}`;
+            src = `books/${selectedMedium.toLowerCase()}/class${cls}/book${i}.jpg`;
+          } else {
+            // For class 11 & 12, we include stream in name
+            name = `class${cls}-${selectedStream.toLowerCase()}-${subject}`;
+            src = `books/${selectedMedium.toLowerCase()}/class${cls}/${selectedStream.toLowerCase()}/book${i}.jpg`;
+          }
+
+          allBooks.push({
+            name: name.toLowerCase(),
+            class: cls,
+            subject: subject.toLowerCase(),
+            stream: selectedStream.toLowerCase(),
+            src: src,
+          });
+        }
+      }
+    }
+
+    // Render books on page
+    function renderBooks(booksToRender = null) {
+      if (!selectedMedium) {
+        bookSection.innerHTML = "<p>Please select a medium first.</p>";
+        return;
+      }
+
+      if ((selectedClass === 11 || selectedClass === 12) && !selectedStream) {
+        bookSection.innerHTML = "<p>Please select a stream for Class 11 or 12.</p>";
+        return;
+      }
+
+      if (!selectedClass) {
+        bookSection.innerHTML = "<p>Please select a class.</p>";
+        return;
+      }
+
+      // If booksToRender is null, generate based on current filters
+      if (!booksToRender) {
+        generateBooks();
+        booksToRender = allBooks.filter((b) => b.class === selectedClass);
+      }
+
+      if (booksToRender.length === 0) {
+        bookSection.innerHTML = "<p>No books found.</p>";
+        return;
+      }
+
+      let html = "";
+      booksToRender.forEach((b) => {
+        html += `<a href="#" class="book">
+          <img src="${b.src}" alt="${b.name}" />
+          <p>${b.name.replace(/-/g, " ")}</p>
+        </a>`;
+      });
+      bookSection.innerHTML = html;
+    }
+
+    // Search logic according to your request
+    searchInput.addEventListener("input", () => {
+      const query = searchInput.value.trim().toLowerCase();
+
+      if (!query) {
+        // Clear search - just render filtered books
+        renderBooks();
+        return;
+      }
+
+      // Extract class number from query if any
+      let classNum = null;
+      const classMatch = query.match(/\bclass\s*(\d{1,2})\b/);
+      if (classMatch) {
+        const c = parseInt(classMatch[1]);
+        if (c >= 1 && c <= 12) classNum = c;
+      } else {
+        // Try to find any standalone number 1-12 in query
+        const numbers = query.match(/\b(\d{1,2})\b/g);
+        if (numbers) {
+          for (const n of numbers) {
+            const c = parseInt(n);
+            if (c >= 1 && c <= 12) {
+              classNum = c;
+              break;
+            }
+          }
+        }
+      }
+
+      // Find subject keywords in query, check for first match
+      let foundSubject = null;
+      for (const sub of subjects) {
+        if (query.includes(sub)) {
+          foundSubject = sub;
+          break;
+        }
+      }
+
+      generateBooks(); // generate fresh for current medium/stream
+
+      let filteredBooks = allBooks;
+
+      // Filter by class if number present
+      if (classNum !== null) {
+        filteredBooks = filteredBooks.filter((b) => b.class === classNum);
+      }
+
+      // Filter by subject if present
+      if (foundSubject !== null) {
+        filteredBooks = filteredBooks.filter((b) => b.subject.includes(foundSubject));
+      }
+
+      // If both class and subject absent, fallback to default filtered by selected filters
+      if (classNum === null && foundSubject === null) {
+        // fallback to current selectedClass filtered books
+        filteredBooks = allBooks.filter((b) => b.class === selectedClass);
+      }
+
+      if (filteredBooks.length === 0) {
+        bookSection.innerHTML = `<p>No books found matching "<strong>${query}</strong>".</p>`;
+        return;
+      }
+
+      let html = "";
+      filteredBooks.forEach((b) => {
+        html += `<a href="#" class="book">
+          <img src="${b.src}" alt="${b.name}" />
+          <p>${b.name.replace(/-/g, " ")}</p>
+        </a>`;
+      });
+      bookSection.innerHTML = html;
+    });
+
+    // Initial setup
+    function init() {
+      createButtons();
+      disableStreams(true);
+      disableClasses(true);
+      bookSection.innerHTML = "<p>Please select a medium first.</p>";
+    }
+    init();
+  </script>
+</body>
+</html>
